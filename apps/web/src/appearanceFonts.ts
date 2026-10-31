@@ -131,10 +131,7 @@ function clampPromptFontSize(value: number): number {
 
 /** Unset, messages stay on text-sm, which is 0.875 of the interface size. */
 export function resolveChatFontSize(chat: number | null, interfaceSize: number): number {
-  return (
-    clampChatFontSize(chat) ??
-    clampFontSize(interfaceSize * 0.875, MIN_CHAT_FONT_SIZE, MAX_CHAT_FONT_SIZE, MIN_CHAT_FONT_SIZE)
-  );
+  return clampChatFontSize(chat) ?? clampInterfaceFontSize(interfaceSize) * 0.875;
 }
 
 function clampChatFontSize(value: number | null): number | null {
