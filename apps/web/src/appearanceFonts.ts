@@ -70,9 +70,10 @@ export interface AppearanceFontPreferences {
   readonly sizeChat: number | null;
   readonly sizeCode: number;
   readonly smoothing: boolean;
+  readonly separate: boolean;
 }
 
-/** Always writes sizes: interface size sets the root; prompt and code use pixels to avoid double scaling. */
+/** Interface size sets the root; prompt and code use pixels to avoid double scaling. */
 export function applyAppearanceFontVariables(
   root: HTMLElement,
   preferences: AppearanceFontPreferences,
@@ -80,8 +81,8 @@ export function applyAppearanceFontVariables(
   const families: ReadonlyArray<readonly [variable: string, custom: string, fallback: string]> = [
     ["--font-sans", preferences.sans, DEFAULT_SANS_FONT_STACK],
     ["--font-mono", preferences.code, DEFAULT_CODE_FONT_STACK],
-    ["--font-composer", preferences.composer, "var(--font-sans)"],
-    ["--font-chat", preferences.chat, "var(--font-sans)"],
+    ["--font-composer", preferences.separate ? preferences.composer : "", "var(--font-sans)"],
+    ["--font-chat", preferences.separate ? preferences.chat : "", "var(--font-sans)"],
   ];
   for (const [variable, custom, fallback] of families) {
     const list = cssFontFamilies(custom);
@@ -93,8 +94,11 @@ export function applyAppearanceFontVariables(
   }
 
   root.style.fontSize = `${clampInterfaceFontSize(preferences.sizeInterface)}px`;
-  root.style.setProperty("--font-size-prompt", `${clampPromptFontSize(preferences.sizePrompt)}px`);
-  const chat = clampChatFontSize(preferences.sizeChat);
+  root.style.setProperty(
+    "--font-size-prompt",
+    preferences.separate ? `${clampPromptFontSize(preferences.sizePrompt)}px` : "var(--text-sm)",
+  );
+  const chat = preferences.separate ? clampChatFontSize(preferences.sizeChat) : null;
   if (chat === null) {
     root.style.removeProperty("--font-size-chat");
   } else {
@@ -127,11 +131,6 @@ function clampInterfaceFontSize(value: number): number {
 
 function clampPromptFontSize(value: number): number {
   return clampFontSize(value, MIN_PROMPT_FONT_SIZE, MAX_PROMPT_FONT_SIZE, DEFAULT_PROMPT_FONT_SIZE);
-}
-
-/** Unset, messages stay on text-sm, which is 0.875 of the interface size. */
-export function resolveChatFontSize(chat: number | null, interfaceSize: number): number {
-  return clampChatFontSize(chat) ?? clampInterfaceFontSize(interfaceSize) * 0.875;
 }
 
 function clampChatFontSize(value: number | null): number | null {
