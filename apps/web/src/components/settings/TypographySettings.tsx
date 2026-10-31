@@ -23,6 +23,7 @@ import {
   DEFAULT_SANS_FONT_STACK,
   isFontFamilyAvailable,
   isMonospaceFamily,
+  resolveChatFontSize,
   resolveDefaultFamilyLabel,
   resolveTerminalFontPreference,
   resolveTerminalFontSizePreference,
@@ -116,8 +117,8 @@ function ChatFontRow() {
         label: "Chat font size",
         min: MIN_CHAT_FONT_SIZE,
         max: MAX_CHAT_FONT_SIZE,
-        value: settings.fontSizeChat,
-        defaultValue: DEFAULT_UNIFIED_SETTINGS.fontSizeChat,
+        value: resolveChatFontSize(settings.fontSizeChat, settings.fontSizeInterface),
+        defaultValue: resolveChatFontSize(null, settings.fontSizeInterface),
         onChange: (fontSizeChat) => updateSettings({ fontSizeChat }),
       }}
       preview={<ChatFontPreview />}
